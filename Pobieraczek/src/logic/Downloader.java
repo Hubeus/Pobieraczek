@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 public class Downloader {
 
 	private final String base = "http://www.tvp.pl/shared/cdn/tokenizer.php?object_id=";
@@ -114,14 +119,28 @@ public class Downloader {
 						.toCharArray());
 			}
 		});
-		// Path dest =
-		// Paths.get("C:\\Documents and Settings\\khoffmann\\Pulpit");
-		// URL video = new
-		// URL("http://195.245.213.192/token/video/vod/14141022/20140305/1542978670/473c334b-270d-4c76-ae0e-9a16d2dcf6d7/video-1.mp4");
-
-		// Files.copy(video.openStream(), Paths.get(dest+"\\test.mp4"));
-		Downloader test = new Downloader(args[0]);
-		test.download(args[1]);
+		
+		Document doc = Jsoup.connect("http://www.tvp.pl/katowice/informacyjne/aktualnosci").get();
+		Elements urls = doc.select("a.info[href~=\\d{8}$]");
+		for (Element url: urls){
+			System.out.println(url.attr("href").toString());
+		}
+		
+		Pattern pattern = Pattern.compile("\\d{8}$");
+		Matcher matcher = pattern.matcher(urls.get(0).attr("href").toString());
+		String ID = "";
+		if(matcher.find()){
+		ID = matcher.group();
+				}
+		
+		System.out.println(ID);
+		
+		
+		
+		DownloadTask task = new DownloadTask(ID, "katowice");
+		
+		task.download();
+		System.out.println("Zakoñczy³em pobieranie");
 		System.exit(0);
 
 		
